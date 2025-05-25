@@ -12,10 +12,28 @@ To build the Docker image, navigate to the project directory and run the followi
 docker build -t minisipserver .
 ```
 
-After building the image, you can run the container using the following command:
+## Running the Docker Image
+
+Either use the command line:
+```
+docker run --rm -p 5060:5060/udp -p 5080:5080/tcp -p 6060:6060/tcp -p 8080:8080/tcp -v ./config:/root/.minisipserver minisipserver
+```
+
+Or use the docker compose file
 
 ```
-docker run --rm -p 8080:8080/tcp -p 5060:5060/udp -v ./config:/root/.minisipserver minisipserver
+services:
+  minisipserver:
+    image: minisipserver
+    container_name: minisipserver
+    ports:
+      - "5060:5060/udp"
+      - "5080:5080/tcp"
+      - "6060:6060/tcp"
+      - "8080:8080/tcp"
+    volumes:
+      - ./config:/root/.minisipserver
+    restart: always
 ```
 
 This will execute the minisipserver application and map the necessary ports.
