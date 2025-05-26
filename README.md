@@ -14,7 +14,7 @@ These Docker images are based on the official MiniSIPServer releases and offer d
 ## Getting Started: Using Pre-built Docker Images
 
 > [!IMPORTANT]  
-> Currently no prebuild images due waiting of approval from MyVoipApp due to their license.
+> The docker image will download and install the MiniSIPServer application during the first start of the docker container to avoid issues with their license. This repository and the docker images do not contain the application. Make sure DNS is properly configured and the website of myvoipapp.com is reachable!
 
 The easiest way to use MiniSIPServer is by pulling a pre-built image from the GitHub Container Registry (GHCR). Images are available for various client limits according to the website:
 
@@ -34,6 +34,7 @@ docker run --rm \
   -p 5060:5060/udp \
   -p 8080:8080/tcp \
   # Optional: Add other ports as needed, e.g., -p 5080:5080/tcp
+  -v ./minisipserver_files:/opt/sipserver \
   -v ./minisipserver_config:/root/.minisipserver \
   --name minisipserver \
   ghcr.io/derkalle4/docker-minisipserver-v60-u5:latest
@@ -63,6 +64,7 @@ services:
       - "3478:3478/udp" # Optional: STUN
       # Add other ports as needed
     volumes:
+      - ./minisipserver_files:/opt/sipserver
       - ./minisipserver_config:/root/.minisipserver
     restart: unless-stopped
 ```
