@@ -61,7 +61,6 @@ services:
       - "5060:5060/udp" # SIP
       - "8080:8080/tcp" # Web interface
       - "5080:5080/tcp" # Optional: SIP over TCP
-      - "3478:3478/udp" # Optional: STUN
       # Add other ports as needed
     volumes:
       - ./minisipserver_files:/opt/sipserver
