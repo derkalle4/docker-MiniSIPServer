@@ -6,7 +6,7 @@ on:
       - docker/v60/u5/Dockerfile
   workflow_dispatch:
 jobs:
-  docker-bfbc2:
+  docker-docker-minisipserver-v60-u5:
     runs-on: ubuntu-latest
     permissions:
       contents: read
