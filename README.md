@@ -54,8 +54,8 @@ services:
     image: ghcr.io/derkalle4/docker-minisipserver:latest
     container_name: minisipserver
     environment:
-      - SRV_VERSION: v60
-      - SRV_TYPE: u5
+      - SRV_VERSION=v60
+      - SRV_TYPE=u5
     ports:
       - "3478:3478/udp" # STUN
       - "3479:3479/udp" # Audio
