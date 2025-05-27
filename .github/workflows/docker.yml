@@ -1,19 +1,19 @@
-name: deploy MiniSipServer-V60-U100 to ghcr.io
+name: deploy MiniSipServer to ghcr.io
 on:
   push:
     paths:
-      - docker/v60/u100/*
-      - docker/v60/u100/Dockerfile
+      - docker/*
+      - docker/Dockerfile
   workflow_dispatch:
 jobs:
-  docker-docker-minisipserver-v60-u100:
+  docker-minisipserver:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     defaults:
       run:
-        working-directory: './docker/v60/u100/'
+        working-directory: './docker/'
     steps:
       - name: 'Checkout Source Code'
         uses: actions/checkout@main
@@ -25,5 +25,5 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: 'Build and Deploy Docker Container'
         run: |
-          docker build . --tag ghcr.io/derkalle4/docker-minisipserver-v60-u100:latest
-          docker push ghcr.io/derkalle4/docker-minisipserver-v60-u100:latest
+          docker build . --tag ghcr.io/derkalle4/docker-minisipserver:latest
+          docker push ghcr.io/derkalle4/docker-minisipserver:latest

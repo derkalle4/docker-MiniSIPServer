@@ -16,34 +16,32 @@ These Docker images are based on the official MiniSIPServer releases and offer d
 > [!IMPORTANT]  
 > The docker image will download and install the MiniSIPServer application during the first start of the docker container to avoid issues with their license. This repository and the docker images do not contain the application. Make sure DNS is properly configured and the website of myvoipapp.com is reachable!
 
-The easiest way to use MiniSIPServer is by pulling a pre-built image from the GitHub Container Registry (GHCR). Images are available for various client limits according to the website:
+The easiest way to use MiniSIPServer is by pulling a pre-built image from the GitHub Container Registry (GHCR). The image available will fit all versions of the MiniSIPServer.
 
-*   **5 Clients:** `ghcr.io/derkalle4/docker-minisipserver-v60-u5:latest`
-*   **20 Clients:** `ghcr.io/derkalle4/docker-minisipserver-v60-u20:latest`
-*   **50 Clients:** `ghcr.io/derkalle4/docker-minisipserver-v60-u50:latest`
-*   **100 Clients:** `ghcr.io/derkalle4/docker-minisipserver-v60-u100:latest`
-*   **300 Clients:** `ghcr.io/derkalle4/docker-minisipserver-v60-u300:latest`
-*   **500 Clients:** `ghcr.io/derkalle4/docker-minisipserver-v60-u500:latest`
+`ghcr.io/derkalle4/docker-minisipserver:latest`
 
 ### Option 1: Using `docker run`
 
-Choose the image version you need (e.g., `u5` for 5 clients) and run the following command:
+Choose the image version you need via the environment-variables (e.g., `SRV_TYPE=u5` for 5 clients and run the following command. Make sure to adjust the ports and other stuff to fit your needs:
 
 ```sh
 docker run --rm \
   -p 5060:5060/udp \
   -p 8080:8080/tcp \
-  # Optional: Add other ports as needed, e.g., -p 5080:5080/tcp
   -v ./minisipserver_files:/opt/sipserver \
   -v ./minisipserver_config:/root/.minisipserver \
+  --env SRV_VERSION=v60 \
+  --env SRV_TYPE=u5 \
   --name minisipserver \
-  ghcr.io/derkalle4/docker-minisipserver-v60-u5:latest
+  ghcr.io/derkalle4/docker-minisipserver:latest
 ```
 
 This command will:
 *   Start a MiniSIPServer container with the 5-client limit.
 *   Map port `5060/udp` (standard SIP) and `8080/tcp` (web interface) from the container to your host.
+*   Mount a local directory `./minisipserver_files` to `/opt/sipserver` inside the container for persistent server files. Create this directory on your host first if it doesn't exist.
 *   Mount a local directory `./minisipserver_config` to `/root/.minisipserver` inside the container for persistent configuration. Create this directory on your host first if it doesn't exist.
+*   Sets the wanted version and type of the MiniSIPServer.
 *   Name the container `minisipserver`.
 
 ### Option 2: Using `docker-compose`
@@ -53,8 +51,11 @@ Create a `docker-compose.yml` file with the following content:
 ```yaml
 services:
   minisipserver:
-    image: ghcr.io/derkalle4/docker-minisipserver-v60-u5:latest # Or your desired version
+    image: ghcr.io/derkalle4/docker-minisipserver:latest
     container_name: minisipserver
+    environment:
+      - SRV_VERSION: v60
+      - SRV_TYPE: u5
     ports:
       - "3478:3478/udp" # STUN
       - "3479:3479/udp" # Audio
@@ -69,7 +70,7 @@ services:
 ```
 
 Then, run `docker-compose up -d` in the same directory as your `docker-compose.yml` file.
-Make sure the `./minisipserver_config` directory exists on your host.
+Make sure the `./minisipserver_files` and `./minisipserver_config` directory exists on your host.
 
 ### Access the Webinterface
 
@@ -97,12 +98,12 @@ Adjust port mappings based on your needs and MiniSIPServer configuration.
 If you prefer to build the images yourself:
 
 1.  Clone this repository.
-2.  Navigate to the specific version directory, e.g., `cd ./docker/v60/u5/`.
+2.  Navigate to the docker directory, e.g., `cd ./docker/`.
 3.  Build the image:
     ```sh
-    docker build -t my-minisipserver-u5 .
+    docker build -t my-minisipserver.
     ```
-    You can then use `my-minisipserver-u5` (or your chosen tag) in your `docker run` or `docker-compose` commands.
+    You can then use `my-minisipserver` (or your chosen tag) in your `docker run` or `docker-compose` commands.
 
 ## License
 

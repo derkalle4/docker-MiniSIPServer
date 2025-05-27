@@ -4,7 +4,7 @@ set -e
 # Check if MiniSIPServer is already installed by checking for its directory
 if [ ! -f "/opt/sipserver/minisipserver-cli" ]; then
   echo "MiniSIPServer executable /opt/sipserver/minisipserver-cli not found. Proceeding with installation..."
-  # Ensure DEBIAN_FRONTEND is set for non-interactive apt commands
+  
   export DEBIAN_FRONTEND=noninteractive
 
   echo "Updating package lists and installing prerequisites (wget, ca-certificates)..."
@@ -17,10 +17,10 @@ if [ ! -f "/opt/sipserver/minisipserver-cli" ]; then
     ca-certificates
 
   echo "Downloading MiniSIPServer package..."
-  wget https://www.myvoipapp.com/download/mss_v60/amd64/mss_v60_u100_amd64.deb -O /tmp/mss_v60_u100_amd64.deb
+  wget https://www.myvoipapp.com/download/mss_$SRV_VERSION/amd64/mss_$SRV_VERSION_$SRV_TYPE_amd64.deb -O /tmp/mss_$SRV_VERSION_$SRV_TYPE_amd64.deb
 
   echo "Installing MiniSIPServer package..."
-  dpkg --install /tmp/mss_v60_u100_amd64.deb
+  dpkg --install /tmp/mss_$SRV_VERSION_$SRV_TYPE_amd64.deb
 
   if [ $? -ne 0 ]; then
     echo "dpkg installation failed. Attempting to fix dependencies..."
@@ -28,7 +28,7 @@ if [ ! -f "/opt/sipserver/minisipserver-cli" ]; then
   fi
 
   echo "Cleaning up downloaded package file..."
-  rm /tmp/mss_v60_u100_amd64.deb
+  rm /tmp/mss_$SRV_VERSION_$SRV_TYPE_amd64.deb
 
   echo "Performing cleanup (autoremove, clean apt cache)..."
   apt-get autoremove -y --purge
