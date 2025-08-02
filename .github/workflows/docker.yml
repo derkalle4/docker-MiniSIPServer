@@ -25,5 +25,5 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: 'Build and Deploy Docker Container'
         run: |
-          docker build . --tag ghcr.io/derkalle4/docker-minisipserver:latest
+          docker build . --platform linux/amd64,linux/arm64 --tag ghcr.io/derkalle4/docker-minisipserver:latest
           docker push ghcr.io/derkalle4/docker-minisipserver:latest
