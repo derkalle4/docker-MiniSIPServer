@@ -18,10 +18,10 @@ trap 'cleanup' SIGTERM SIGINT
 # install winetricks dependencies if wineprefix is not initialized
 if [ ! -d "/opt/sipserver/.wine" ]; then
     echo "Wine prefix not found. Initializing..."
-    wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -O /bin/winetricks
-    chmod +x /bin/winetricks
-    /bin/winetricks -q vcrun2019
-    rm -rf /opt/sipserver/.cache/
+    wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -O /opt/sipserver/winetricks
+    chmod +x /opt/sipserver/winetricks
+    /opt/sipserver/winetricks -q vcrun2019
+    rm -rf /opt/sipserver/sipserver/.cache/
     echo "Dependencies installed."
 fi
 
