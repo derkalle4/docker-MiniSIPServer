@@ -28,7 +28,7 @@ jobs:
       - name: 'Build and Deploy Docker Container'
         uses: docker/build-push-action@v5
         with:
-          context: ./docker
+          context: ./docker-linux
           platforms: linux/amd64
           push: true
           tags: ghcr.io/derkalle4/docker-minisipserver:latest
