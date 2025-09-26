@@ -21,6 +21,7 @@ RUN apt update \
         xvfb \
         wget \
         ca-certificates \
+        cabextract \
     && useradd -m -d /opt/sipserver -s /bin/bash container \
     # Clean up everything in one go
     && apt clean \
