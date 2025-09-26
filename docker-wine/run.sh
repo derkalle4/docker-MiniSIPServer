@@ -43,7 +43,7 @@ if [ ! -d "/opt/sipserver/.wine" ]; then
     
     # Install dependencies
     echo "== Installing Wine dependencies..."
-    /opt/sipserver/winetricks -q vcrun2019
+    /opt/sipserver/winetricks -q corefonts vcrun2019
     
     # Clean up
     rm -rf /opt/sipserver/.cache/ 2>/dev/null
