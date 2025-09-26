@@ -10,9 +10,28 @@ wine --version
 # Trap SIGTERM (sent by docker stop) and SIGINT (Ctrl+C)
 cleanup() {
     echo "== Cleaning up..."
+    
+    # Kill the tail process if it exists
+    if [ ! -z "$TAIL_PID" ]; then
+        kill $TAIL_PID 2>/dev/null
+        echo "== Stopped log monitoring"
+    fi
+    
+    # Kill the main application if it exists
     if [ ! -z "$APP_PID" ]; then
         kill $APP_PID 2>/dev/null
+        echo "== Stopped main application"
+        # Give it a moment to exit gracefully
+        sleep 2
+        # Force kill if still running
+        kill -9 $APP_PID 2>/dev/null
     fi
+    
+    # Kill any remaining wine processes
+    pkill -f wine 2>/dev/null
+    pkill -f minisipserver 2>/dev/null
+    
+    echo "== Cleanup complete"
     exit 0
 }
 trap 'cleanup' SIGTERM SIGINT
@@ -66,7 +85,14 @@ if [ -f "/opt/sipserver/minisipserver-cli.exe" ]; then
   else
     echo "== Log directory not found, continuing without log monitoring"
   fi
+  
+  # Wait for the main application to exit
   wait $APP_PID
+  
+  # Clean up the tail process when main app exits
+  if [ ! -z "$TAIL_PID" ]; then
+    kill $TAIL_PID 2>/dev/null
+  fi
 else
   echo "== Error: /opt/sipserver/minisipserver-cli.exe not found. Did you copy the files correctly?"
   exit 1
