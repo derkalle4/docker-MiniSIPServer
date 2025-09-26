@@ -12,6 +12,7 @@ ENV USER=container \
     DISPLAY_HEIGHT=720 \
     DISPLAY_DEPTH=24 \
     XVFB=1 \
+    XDG_RUNTIME_DIR=/tmp \
     DEBIAN_FRONTEND=noninteractive
 
 # install necessary additional dependencies
