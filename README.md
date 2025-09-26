@@ -72,7 +72,7 @@ services:
 Then, run `docker-compose up -d` in the same directory as your `docker-compose.yml` file.
 Make sure the `./minisipserver_files` and `./minisipserver_config` directory exists on your host.
 
-## wine linux version for arm64 (and amd64) (ghcr.io/derkalle4/docker-minisipserver-wine)
+## wine linux version for arm64 (ONLY) (ghcr.io/derkalle4/docker-minisipserver-wine)
 
 > [!IMPORTANT]  
 > This docker image will NOT download and install the MiniSIPServer application. You need to download the the latest version yourself and install it locally on your computer and move the installed files manually to your docker instance.
