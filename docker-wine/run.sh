@@ -9,8 +9,9 @@ wine --version
 
 # start virtual display
 if [[ $XVFB == 1 ]]; then
-    if ! pgrep -f "Xvfb ${DISPLAY}" > /dev/null; then
+    if ! pgrep -f "Xvfb" > /dev/null; then
         echo "== Starting Xvfb..."
+        rm /tmp/.X${DISPLAY#:}-lock 2>/dev/null
         Xvfb ${DISPLAY} -nolisten tcp -screen 0 ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}x${DISPLAY_DEPTH} &
         sleep 2  # Give Xvfb time to start
     else
@@ -58,6 +59,7 @@ echo "== Starting minisipserver (windows version)"
 if [ -f "/opt/sipserver/minisipserver.exe" ]; then
   wine /opt/sipserver/minisipserver.exe &
   APP_PID=$!
+  sleep 3 # Give the application some time to start
   # Monitor the latest log file in real-time
   LOG_DIR="/opt/sipserver/.wine/drive_c/users/container/AppData/Roaming/minisipserver/log"
   if [ -d "$LOG_DIR" ]; then
