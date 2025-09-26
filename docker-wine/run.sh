@@ -9,12 +9,12 @@ wine --version
 
 # start virtual display
 if [[ $XVFB == 1 ]]; then
-    if ! pgrep -f "Xvfb :99" > /dev/null; then
+    if ! pgrep -f "Xvfb ${DISPLAY}" > /dev/null; then
         echo "== Starting Xvfb..."
-        Xvfb :99 -nolisten tcp -screen 0 ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}x${DISPLAY_DEPTH} &
+        Xvfb ${DISPLAY} -nolisten tcp -screen 0 ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}x${DISPLAY_DEPTH} &
         sleep 2  # Give Xvfb time to start
     else
-        echo "== Xvfb is already running on display :99"
+        echo "== Xvfb is already running on display :0"
     fi
 fi
 

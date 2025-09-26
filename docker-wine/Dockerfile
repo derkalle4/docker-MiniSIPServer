@@ -7,7 +7,7 @@ ENV USER=container \
     WINE_CPU=arm64 \
     WINEPREFIX="/opt/sipserver/.wine" \
     WINEDEBUG=-all \
-    DISPLAY=:99 \
+    DISPLAY=:0 \
     DISPLAY_WIDTH=1280 \
     DISPLAY_HEIGHT=720 \
     DISPLAY_DEPTH=24 \
@@ -19,6 +19,7 @@ ENV USER=container \
 RUN apt update \
     && apt install --no-install-recommends -y \
         xvfb \
+        procps \
         wget \
         ca-certificates \
         cabextract \

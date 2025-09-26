@@ -77,6 +77,8 @@ Make sure the `./minisipserver_files` and `./minisipserver_config` directory exi
 > [!IMPORTANT]  
 > This docker image will NOT download and install the MiniSIPServer application. You need to download the the latest version yourself and install it locally on your computer and move the installed files manually to your docker instance.
 
+Many thanks to https://github.com/AndreRH/hangover for providing a working wine arm64 environment.
+
 `ghcr.io/derkalle4/docker-minisipserver-wine:latest`
 
 ### docker run
@@ -88,7 +90,6 @@ docker run --rm \
   -p 5060:5060/udp \
   -p 8080:8080/tcp \
   -v ./minisipserver_files:/opt/sipserver \
-  -v ./minisipserver_config:/opt/sipserver/.wine/drive_c/users/container/AppData/Roaming/minisipserver/ \
   --name minisipserver \
   ghcr.io/derkalle4/docker-minisipserver-wine:latest
 ```
@@ -120,6 +121,8 @@ services:
       - ./minisipserver_files:/opt/sipserver
     restart: unless-stopped
 ```
+
+Make sure to either use a docker volume (for correct permissions to /opt/sipserver) or manually `chown 1000:1000 ./minisipserver_files`. Othewise the server will error out.
 
 Then, run `docker-compose up -d` in the same directory as your `docker-compose.yml` file.
 Make sure the `./minisipserver_files` directory exists on your host.
