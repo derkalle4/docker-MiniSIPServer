@@ -7,25 +7,12 @@ echo "== $(cat /etc/debian_version)"
 echo "== Current timezone: $(cat /etc/timezone)"
 wine --version
 
-# start virtual display
-if [[ $XVFB == 1 ]]; then
-    if ! pgrep -f "Xvfb" > /dev/null; then
-        echo "== Starting Xvfb..."
-        rm /tmp/.X${DISPLAY#:}-lock 2>/dev/null
-        Xvfb ${DISPLAY} -nolisten tcp -screen 0 ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}x${DISPLAY_DEPTH} &
-        sleep 2  # Give Xvfb time to start
-    else
-        echo "== Xvfb is already running on display :0"
-    fi
-fi
-
 # Trap SIGTERM (sent by docker stop) and SIGINT (Ctrl+C)
 cleanup() {
     echo "== Cleaning up..."
     if [ ! -z "$APP_PID" ]; then
         kill $APP_PID 2>/dev/null
     fi
-    pkill Xvfb 2>/dev/null
     exit 0
 }
 trap 'cleanup' SIGTERM SIGINT
@@ -36,8 +23,7 @@ if [ ! -d "/opt/sipserver/.wine" ]; then
     
     # Initialize wine prefix using wineboot (headless alternative to winecfg)
     echo "== Initializing Wine prefix with wineboot..."
-    wineboot --init
-    
+
     # Download and install winetricks
     wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -O /opt/sipserver/winetricks
     chmod +x /opt/sipserver/winetricks
@@ -56,8 +42,8 @@ fi
 # Start the main application in the background
 echo "== Starting minisipserver (windows version)"
 # Ensure the application exists before trying to run it
-if [ -f "/opt/sipserver/minisipserver.exe" ]; then
-  wine /opt/sipserver/minisipserver.exe &
+if [ -f "/opt/sipserver/minisipserver-cli.exe" ]; then
+  wine /opt/sipserver/minisipserver-cli.exe &
   APP_PID=$!
   sleep 3 # Give the application some time to start
   # Monitor the latest log file in real-time
@@ -82,7 +68,7 @@ if [ -f "/opt/sipserver/minisipserver.exe" ]; then
   fi
   wait $APP_PID
 else
-  echo "== Error: /opt/sipserver/minisipserver.exe not found. Did you copy the files correctly?"
+  echo "== Error: /opt/sipserver/minisipserver-cli.exe not found. Did you copy the files correctly?"
   exit 1
 fi
 echo "== minisipserver (windows version) has exited. Script finishing."

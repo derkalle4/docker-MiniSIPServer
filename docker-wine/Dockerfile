@@ -18,8 +18,6 @@ ENV USER=container \
 # install necessary additional dependencies
 RUN apt update \
     && apt install --no-install-recommends -y \
-        xvfb \
-        procps \
         wget \
         ca-certificates \
         cabextract \
