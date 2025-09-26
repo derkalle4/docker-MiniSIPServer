@@ -90,7 +90,7 @@ if [ -f "/opt/sipserver/minisipserver-cli.exe" ]; then
   wait $APP_PID
   
   # Clean up the tail process when main app exits
-  if [ ! -z "$TAIL_PID" ]; then
+  if [ ! -z "$APP_PID" ]; then
     kill $TAIL_PID 2>/dev/null
   fi
 else
