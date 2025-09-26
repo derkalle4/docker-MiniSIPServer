@@ -1,172 +1,249 @@
-# MiniSIPServer Dockerized
+# Docker MiniSIPServer
 
 > [!IMPORTANT]  
-> This repository is a private project and is not affiliated with, endorsed by, or in any way officially connected to the company behind MiniSIPServer (myvoipapp.com). It is provided solely for convenience to the community.
+> This is an independent, community-driven project that provides Docker containerization for the MiniSIPServer application.
 
-This project provides Docker images for running the [MiniSIPServer](https://www.myvoipapp.com/index.html) application and allows for a simple way to run a SIP server, for instance, to connect traditional landline phones via SIP adapters.
+This project is:
 
+- **NOT affiliated with** myvoipapp.com or MiniSIPServer developers
+- **Does NOT contain** any MiniSIPServer code, binaries, or licensed content
+- **Does NOT redistribute** the MiniSIPServer application
+- **Provided as-is** for community convenience
 
+MiniSIPServer is a proprietary application owned by myvoipapp.com. Please refer to their website for licensing terms and official support.
+
+## About This Project
+
+This repository provides Docker images to run [MiniSIPServer](https://www.myvoipapp.com/index.html) in containerized environments. MiniSIPServer is a SIP server application commonly used to connect traditional landline phones via SIP adapters or manage VoIP communications. My use-case is a small home-used SIP server on a raspberry pi and before that on my NAS (hence the two supported versions via docker for easy deployment and backup).
 
 ## Prerequisites
 
-*   [Docker](https://docs.docker.com/get-docker/) must be installed on your system.
+- [Docker](https://docs.docker.com/get-docker/) installed on your system
+- Basic understanding of Docker concepts
 
-## native linux version for amd64 (ghcr.io/derkalle4/docker-minisipserver)
+## Available Docker Images
 
-> [!IMPORTANT]  
-> This docker image will download and install the MiniSIPServer application during the first start of the docker container to avoid issues with their license. This repository and the docker images do not contain the application. Make sure DNS is properly configured and the website of myvoipapp.com is reachable!
+### AMD64 Native Linux Image
 
-The easiest way to use MiniSIPServer is by pulling a pre-built image from the GitHub Container Registry (GHCR). The image available will fit all versions of the MiniSIPServer.
+**Image:** `ghcr.io/derkalle4/docker-minisipserver:latest`
 
-`ghcr.io/derkalle4/docker-minisipserver:latest`
+**Important:** This image automatically downloads and installs MiniSIPServer during first startup. Ensure:
+- DNS is properly configured
+- myvoipapp.com website is reachable from your Docker host
 
-### docker run
+### ARM64 Wine-based Image
 
-Choose the image version you need via the environment-variables (e.g., `SRV_TYPE=u5` for 5 clients and run the following command. Make sure to adjust the ports and other stuff to fit your needs:
+**Image:** `ghcr.io/derkalle4/docker-minisipserver-wine:latest`
 
-```sh
-docker run --rm \
+**Important:** This image does NOT download MiniSIPServer. You must:
+1. Download MiniSIPServer (Windows) manually from myvoipapp.com
+2. Install it on a Windows/Wine environment
+3. Copy the installed files to your Docker volume
+
+Thanks to the [Hangover project](https://github.com/AndreRH/hangover) for ARM64 Wine support.
+
+## Quick Start
+
+### Step 1: Create Required Directories
+
+```bash
+mkdir -p ./minisipserver_files ./minisipserver_config
+```
+
+### Step 2: Choose Your Deployment Method
+
+## Using Docker Run
+
+### AMD64 Systems
+
+```bash
+docker run -d \
+  --name minisipserver \
   -p 5060:5060/udp \
   -p 8080:8080/tcp \
+  -p 3478:3478/udp \
+  -p 3479:3479/udp \
   -v ./minisipserver_files:/opt/sipserver \
   -v ./minisipserver_config:/root/.minisipserver \
-  --env SRV_VERSION=v60 \
-  --env SRV_TYPE=u5 \
-  --name minisipserver \
+  -e SRV_VERSION=v60 \
+  -e SRV_TYPE=u5 \
   ghcr.io/derkalle4/docker-minisipserver:latest
 ```
 
-This command will:
-*   Start a MiniSIPServer container with the 5-client limit.
-*   Map port `5060/udp` (standard SIP) and `8080/tcp` (web interface) from the container to your host.
-*   Mount a local directory `./minisipserver_files` to `/opt/sipserver` inside the container for persistent server files. Create this directory on your host first if it doesn't exist.
-*   Mount a local directory `./minisipserver_config` to `/root/.minisipserver` inside the container for persistent configuration. Create this directory on your host first if it doesn't exist.
-*   Sets the wanted version and type of the MiniSIPServer.
-*   Name the container `minisipserver`.
+### ARM64 Systems
 
-### docker compose
+```bash
+docker run -d \
+  --name minisipserver \
+  -p 5060:5060/udp \
+  -p 8080:8080/tcp \
+  -p 3478:3478/udp \
+  -p 3479:3479/udp \
+  -v ./minisipserver_files:/opt/sipserver \
+  ghcr.io/derkalle4/docker-minisipserver-wine:latest
+```
 
-Create a `docker-compose.yml` file with the following content:
+Ensure proper file permissions:
+```bash
+sudo chown -R 1000:1000 ./minisipserver_files
+```
+
+Alternatively use docker volumes instead of local paths and everything will have the correct permissions automatically.
+
+## Using Docker Compose
+
+### AMD64 Systems
+
+Create `docker-compose.yml`:
 
 ```yaml
 services:
   minisipserver:
     image: ghcr.io/derkalle4/docker-minisipserver:latest
     container_name: minisipserver
+    restart: unless-stopped
     environment:
       - SRV_VERSION=v60
       - SRV_TYPE=u5
     ports:
-      - "3478:3478/udp" # STUN
-      - "3479:3479/udp" # Audio
-      - "5060:5060/udp" # SIP
-      - "8080:8080/tcp" # Web interface
-      - "5080:5080/tcp" # Optional: SIP over TCP
-      # Add other ports as needed
+      - "3478:3478/udp"  # STUN
+      - "3479:3479/udp"  # Audio
+      - "5060:5060/udp"  # SIP
+      - "5080:5080/tcp"  # SIP over TCP
+      - "8080:8080/tcp"  # Web interface
     volumes:
       - ./minisipserver_files:/opt/sipserver
       - ./minisipserver_config:/root/.minisipserver
-    restart: unless-stopped
 ```
 
-Then, run `docker-compose up -d` in the same directory as your `docker-compose.yml` file.
-Make sure the `./minisipserver_files` and `./minisipserver_config` directory exists on your host.
+### ARM64 Systems
 
-## wine linux version for arm64 (ONLY) (ghcr.io/derkalle4/docker-minisipserver-wine)
-
-> [!IMPORTANT]  
-> This docker image will NOT download and install the MiniSIPServer application. You need to download the the latest version yourself and install it locally on your computer and move the installed files manually to your docker instance.
-
-Many thanks to https://github.com/AndreRH/hangover for providing a working wine arm64 environment.
-
-`ghcr.io/derkalle4/docker-minisipserver-wine:latest`
-
-### docker run
-
-Choose the image version you need via the environment-variables (e.g., `SRV_TYPE=u5` for 5 clients and run the following command. Make sure to adjust the ports and other stuff to fit your needs:
-
-```sh
-docker run --rm \
-  -p 5060:5060/udp \
-  -p 8080:8080/tcp \
-  -v ./minisipserver_files:/opt/sipserver \
-  --name minisipserver \
-  ghcr.io/derkalle4/docker-minisipserver-wine:latest
-```
-
-This command will:
-*   Start a MiniSIPServer container with your chosen MiniSIPServer version.
-*   Map port `5060/udp` (standard SIP) and `8080/tcp` (web interface) from the container to your host.
-*   Mount a local directory `./minisipserver_files` to `/opt/sipserver` inside the container for persistent server files. Create this directory on your host first if it doesn't exist.
-*   Mount a local directory `./minisipserver_config` to `/root/.minisipserver` inside the container for persistent configuration. Create this directory on your host first if it doesn't exist.
-*   Name the container `minisipserver`.
-
-### docker compose
-
-Create a `docker-compose.yml` file with the following content:
+Create `docker-compose.yml`:
 
 ```yaml
 services:
   minisipserver:
     image: ghcr.io/derkalle4/docker-minisipserver-wine:latest
     container_name: minisipserver
+    restart: unless-stopped
     ports:
-      - "3478:3478/udp" # STUN
-      - "3479:3479/udp" # Audio
-      - "5060:5060/udp" # SIP
-      - "8080:8080/tcp" # Web interface
-      - "5080:5080/tcp" # Optional: SIP over TCP
-      # Add other ports as needed
+      - "3478:3478/udp"  # STUN
+      - "3479:3479/udp"  # Audio
+      - "5060:5060/udp"  # SIP
+      - "5080:5080/tcp"  # SIP over TCP
+      - "8080:8080/tcp"  # Web interface
     volumes:
       - ./minisipserver_files:/opt/sipserver
-    restart: unless-stopped
 ```
 
-Make sure to either use a docker volume (for correct permissions to /opt/sipserver) or manually `chown 1000:1000 ./minisipserver_files`. Othewise the server will error out.
+### Start the Service
 
-Then, run `docker-compose up -d` in the same directory as your `docker-compose.yml` file.
-Make sure the `./minisipserver_files` directory exists on your host.
+```bash
+docker-compose up -d
+```
 
-## Quick Start Guide
+## Configuration
 
-### Access the Webinterface
+### Environment Variables (AMD64 only)
 
-After the first start a random webinterface password will be created. This will reset every time you restart the docker container if you do not enter a custom one in the webinterface! So make sure to change it once you logged in. You will find the password in the log-file inside the config directory.
+| Variable | Description | Example Values |
+|----------|-------------|----------------|
+| `SRV_VERSION` | MiniSIPServer version | `v60` (default) |
+| `SRV_TYPE` | Client limit type | `u5`, `u10`, `u25`, `u50` |
 
-Access the web interface at `http://<your-docker-host-ip>:8080`.
+### Port Configuration
 
-### Configuration
+| Port | Protocol | Purpose |
+|------|----------|---------|
+| 3478 | UDP | STUN server |
+| 3479 | UDP | Audio streaming |
+| 5060 | UDP | SIP signaling |
+| 5080 | TCP | SIP over TCP |
+| 8080 | TCP | Web interface |
+| 10000-100xx | UDP | RTP media (configurable) |
 
-#### Ports
+### Accessing the Web Interface
 
-MiniSIPServer uses several ports:
+1. Navigate to `http://YOUR_HOST_IP:8080`
+2. Find the auto-generated password in the logs:
+   ```bash
+   docker logs minisipserver
+   ```
+   Or check the config directory: `./minisipserver_config/`
+3. **Important:** Change the default password immediately to prevent it from resetting on container restart
 
-*   `3478/udp` (STUN)
-*   `3479/udp` (Audio)
-*   `5060/udp` (SIP)
-*   `5080/tcp` (SIP over TCP)
-*   `8080/tcp` (Webinterface)
-*   `10000-100xx/udp` (RTP media range, configurable in MiniSIPServer)
+## ARM64 Setup Instructions
 
-Adjust port mappings based on your needs and MiniSIPServer configuration.
+### Installing MiniSIPServer Files
 
-## Development / manual image build
+1. Download MiniSIPServer from [myvoipapp.com](https://www.myvoipapp.com)
+2. Install on a Windows system or Wine environment
+3. Copy the installation directory contents to `./minisipserver_files/`
+4. Set proper permissions:
+   ```bash
+   sudo chown -R 1000:1000 ./minisipserver_files
+   ```
+
+## Troubleshooting
+
+### Common Issues
+
+**Permission denied errors:**
+```bash
+sudo chown -R 1000:1000 ./minisipserver_files
+```
+
+**Container won't start:**
+- Verify internet connectivity
+- Check if myvoipapp.com is accessible
+- Review container logs: `docker logs minisipserver`
+
+**Web interface inaccessible:**
+- Verify port 8080 is not in use
+- Check firewall settings
+- Ensure container is running: `docker ps`
+
+### Logs and Debugging
+
+View container logs:
+```bash
+docker logs minisipserver -f
+```
+
+Access container shell:
+```bash
+docker exec -it minisipserver bash
+```
+
+## Building from Source
 
 If you prefer to build the images yourself:
 
-1.  Clone this repository.
-2.  Navigate to the docker directory, e.g., `cd ./docker-linux/`.
-3.  Build the image:
-    ```sh
-    docker build -t my-minisipserver .
-    ```
-    You can then use `my-minisipserver` (or your chosen tag) in your `docker run` or `docker-compose` commands.
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/derkalle4/docker-MiniSIPServer.git
+   cd docker-MiniSIPServer
+   ```
 
-## License
+2. Build for your platform:
+   ```bash
+   # For AMD64
+   cd docker-linux
+   docker build -t my-minisipserver .
+   
+   # For ARM64
+   cd docker-wine
+   docker build -t my-minisipserver-wine .
+   ```
 
-The MiniSIPServer software is provided by [myvoipapp.com](https://www.myvoipapp.com). Please refer to their website for licensing details of the MiniSIPServer application.
-The scripts and Dockerfiles in this repository are provided under the [LICENSE](LICENSE) file in this repository.
+## License and Legal
 
-## Acknowledgements
+- **MiniSIPServer:** Proprietary software by myvoipapp.com - see their website for licensing
+- **This project:** Open source - see [LICENSE](LICENSE) file for details
+- **No warranty:** This project is provided as-is without any warranties
 
-Thanks to [myvoipapp.com](https://www.myvoipapp.com) for providing MiniSIPServer, especially the free version for small use cases.
+## Acknowledgments
+
+- [myvoipapp.com](https://www.myvoipapp.com) for creating MiniSIPServer
+- [Hangover project](https://github.com/AndreRH/hangover) for ARM64 Wine support
+- The Docker and open-source community
